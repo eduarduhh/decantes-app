@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Tampa em formato de diamante -->
+    <path
+        android:pathData="M54,15 L38,28 L46,41 L62,41 L70,28 Z"
+        android:fillColor="#5C7E93" />
+
+    <!-- Gargalo -->
+    <path
+        android:pathData="M46,41 L46,51 L62,51 L62,41 Z"
+        android:fillColor="#5C7E93" />
+
+    <!-- Botão/válvula -->
+    <path
+        android:pathData="M49,50 L49,56 L59,56 L59,50 Z"
+        android:fillColor="#4F7A6D" />
+
+    <!-- Corpo do frasco -->
+    <path
+        android:pathData="M28,63 C28,58 32,54 37,54 L71,54 C76,54 80,58 80,63 L80,89 C80,92.3 77.3,95 74,95 L34,95 C30.7,95 28,92.3 28,89 Z"
+        android:fillColor="#6C93B0" />
+
+    <!-- Brilho / reflexo -->
+    <path
+        android:pathData="M37,60 C37,58.3 38.3,57 40,57 L44,57 C45.7,57 47,58.3 47,60 L47,84 C47,85.7 45.7,87 44,87 L40,87 C38.3,87 37,85.7 37,84 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.22" />
+
+    <!-- Onda/ribbon interna -->
+    <path
+        android:pathData="M33,74 C42,67 46,67 54,72 C62,77 66,77 75,70 L75,79 C66,86 62,86 54,81 C46,76 42,76 33,83 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.16" />
+</vector>
