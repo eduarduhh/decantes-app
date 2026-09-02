@@ -62,3 +62,8 @@ val OnErrorDark = Color(0xFF3F2013)
 val SucessoVerde = Color(0xFF2E7D32)
 val AlertaAmarelo = Color(0xFFC79A3C)
 val ErroVermelho = TerracotaSuave
+
+// Texto escuro usado sobre AlertaAmarelo/ErroVermelho: branco fixo reprovava
+// contraste WCAG AA nesses dois fundos (~2.1:1 e ~3.3:1). SucessoVerde
+// continua usando texto branco (~5.5:1, ok).
+val TextoBadgeEscuro = Color(0xFF241714)

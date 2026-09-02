@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+val CATEGORIAS_PERFUME = listOf("Masculino", "Feminino", "Compartilhável")
+
 /** Pequeno ícone que indica se um perfume é masculino, feminino ou compartilhável. */
 @Composable
 fun CategoriaIcon(categoria: String, modifier: Modifier = Modifier) {

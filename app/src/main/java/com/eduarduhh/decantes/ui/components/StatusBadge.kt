@@ -9,26 +9,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.eduarduhh.decantes.data.relation.StatusPerfume
 import com.eduarduhh.decantes.ui.theme.AlertaAmarelo
 import com.eduarduhh.decantes.ui.theme.ErroVermelho
 import com.eduarduhh.decantes.ui.theme.SucessoVerde
+import com.eduarduhh.decantes.ui.theme.TextoBadgeEscuro
 
 @Composable
 fun StatusBadge(status: StatusPerfume, modifier: Modifier = Modifier) {
-    val (texto, cor) = when (status) {
-        StatusPerfume.PENDENTE -> "Pendente" to ErroVermelho
-        StatusPerfume.PARCIAL -> "Parcial" to AlertaAmarelo
-        StatusPerfume.QUITADO -> "Quitado" to SucessoVerde
+    val (texto, corFundo, corTexto) = when (status) {
+        StatusPerfume.PENDENTE -> Triple("Pendente", ErroVermelho, TextoBadgeEscuro)
+        StatusPerfume.PARCIAL -> Triple("Parcial", AlertaAmarelo, TextoBadgeEscuro)
+        StatusPerfume.QUITADO -> Triple("Quitado", SucessoVerde, Color.White)
     }
     Text(
         text = texto,
-        color = Color.White,
-        fontSize = 12.sp,
         modifier = modifier
-            .background(cor, RoundedCornerShape(8.dp))
+            .background(corFundo, RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp, vertical = 3.dp),
-        style = MaterialTheme.typography.labelSmall.copy(color = Color.White)
+        style = MaterialTheme.typography.labelSmall.copy(color = corTexto)
     )
 }

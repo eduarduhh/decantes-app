@@ -20,12 +20,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,10 +65,28 @@ fun HomeScreen(
     val viewModel: HomeViewModel = viewModel(factory = ViewModelFactory(repository))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var valoresOcultos by rememberSaveable { mutableStateOf(false) }
+    var menuAberto by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Decantes") })
+            TopAppBar(
+                title = { Text("Decantes") },
+                actions = {
+                    IconButton(onClick = { menuAberto = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "Mais opções")
+                    }
+                    DropdownMenu(expanded = menuAberto, onDismissRequest = { menuAberto = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Backup") },
+                            leadingIcon = { Icon(Icons.Filled.CloudUpload, contentDescription = null) },
+                            onClick = {
+                                menuAberto = false
+                                onAbrirBackup()
+                            }
+                        )
+                    }
+                }
+            )
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
@@ -122,22 +143,15 @@ fun HomeScreen(
                 }
             }
 
-            Row(
+            OutlinedButton(
+                onClick = onAbrirGrupos,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                OutlinedButton(onClick = onAbrirGrupos, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Grupos")
-                }
-                OutlinedButton(onClick = onAbrirBackup, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Filled.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Backup")
-                }
+                Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Grupos")
             }
 
             Spacer(modifier = Modifier.height(8.dp))

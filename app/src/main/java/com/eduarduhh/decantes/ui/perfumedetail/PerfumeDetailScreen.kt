@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,6 +51,7 @@ import com.eduarduhh.decantes.data.repository.DecantesRepository
 import com.eduarduhh.decantes.ui.components.CategoriaIcon
 import com.eduarduhh.decantes.ui.components.ConfirmDialog
 import com.eduarduhh.decantes.ui.components.PagamentoDialog
+import com.eduarduhh.decantes.ui.components.PerfumeFormDialog
 import com.eduarduhh.decantes.ui.components.StatusBadge
 import com.eduarduhh.decantes.ui.components.formatarData
 import com.eduarduhh.decantes.ui.components.formatarMoeda
@@ -71,6 +73,7 @@ fun PerfumeDetailScreen(
     var pagamentoParaEditar by remember { mutableStateOf<Pagamento?>(null) }
     var pagamentoParaExcluir by remember { mutableStateOf<Pagamento?>(null) }
     var mostrarConfirmExcluirPerfume by remember { mutableStateOf(false) }
+    var mostrarDialogoEditarPerfume by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.perfumeExcluido) {
         if (uiState.perfumeExcluido) onVoltar()
@@ -117,6 +120,9 @@ fun PerfumeDetailScreen(
                         }) {
                             Icon(Icons.Filled.ContentCopy, contentDescription = "Copiar marca e nome")
                         }
+                        IconButton(onClick = { mostrarDialogoEditarPerfume = true }) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Editar perfume")
+                        }
                     }
                     IconButton(onClick = { mostrarConfirmExcluirPerfume = true }) {
                         Icon(Icons.Filled.Delete, contentDescription = "Excluir perfume")
@@ -142,7 +148,7 @@ fun PerfumeDetailScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(
@@ -217,6 +223,7 @@ fun PerfumeDetailScreen(
     if (mostrarDialogoPagamento) {
         PagamentoDialog(
             titulo = "Lançar pagamento",
+            valorInicial = item?.saldoRestante,
             onDismiss = { mostrarDialogoPagamento = false },
             onConfirmar = { valor, data ->
                 viewModel.lancarPagamento(valor, data)
@@ -247,6 +254,23 @@ fun PerfumeDetailScreen(
             onConfirmar = {
                 viewModel.excluirPagamento(pagamento)
                 pagamentoParaExcluir = null
+            }
+        )
+    }
+
+    if (mostrarDialogoEditarPerfume && item != null) {
+        PerfumeFormDialog(
+            titulo = "Editar perfume",
+            nomeInicial = item.perfume.nome,
+            marcaInicial = item.perfume.marca,
+            mlInicial = item.perfume.ml.toString(),
+            valorInicial = "%.2f".format(item.perfume.valorTotal),
+            categoriaInicial = item.perfume.categoria,
+            marcasSugeridas = uiState.marcasSugeridas,
+            onDismiss = { mostrarDialogoEditarPerfume = false },
+            onConfirmar = { nome, marca, ml, valor, categoria ->
+                viewModel.editarPerfume(nome, marca, ml, valor, categoria)
+                mostrarDialogoEditarPerfume = false
             }
         )
     }
@@ -282,7 +306,12 @@ private fun PagamentoItem(
             }
             Row {
                 androidx.compose.material3.TextButton(onClick = onEditar) { Text("Editar") }
-                androidx.compose.material3.TextButton(onClick = onExcluir) { Text("Excluir") }
+                androidx.compose.material3.TextButton(
+                    onClick = onExcluir,
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) { Text("Excluir") }
             }
         }
     }

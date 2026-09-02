@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eduarduhh.decantes.data.repository.DecantesRepository
-import com.eduarduhh.decantes.ui.components.formatarData
 import com.eduarduhh.decantes.ui.components.formatarMoeda
 import com.eduarduhh.decantes.viewmodel.GroupListViewModel
 import com.eduarduhh.decantes.viewmodel.GrupoResumoUi
@@ -165,13 +164,15 @@ private fun GrupoItem(resumo: GrupoResumoUi, onClick: () -> Unit) {
             Column {
                 Text(resumo.grupo.nome, style = MaterialTheme.typography.titleMedium)
                 Text(
-                    formatarData(resumo.grupo.dataCriacao),
-                    style = MaterialTheme.typography.bodySmall,
+                    "${formatarMoeda(resumo.totalPago)} pago de ${formatarMoeda(resumo.totalGrupo)}",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                val saldo = resumo.totalGrupo - resumo.totalPago
                 Text(
-                    "${formatarMoeda(resumo.totalPago)} pago de ${formatarMoeda(resumo.totalGrupo)}",
-                    style = MaterialTheme.typography.bodyMedium
+                    "Saldo: ${formatarMoeda(saldo)}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (saldo > 0.0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -200,6 +201,9 @@ private fun NovoGrupoDialog(
                 label = { Text("Nome do grupo") },
                 isError = erro != null,
                 supportingText = { erro?.let { Text(it) } },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Words
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
         },

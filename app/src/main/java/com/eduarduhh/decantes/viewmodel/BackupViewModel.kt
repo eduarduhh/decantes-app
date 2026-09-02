@@ -3,6 +3,7 @@ package com.eduarduhh.decantes.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.eduarduhh.decantes.data.repository.BackupArquivo
 import com.eduarduhh.decantes.data.repository.DecantesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,8 @@ sealed class BackupMensagem {
 
 data class BackupUiState(
     val processando: Boolean = false,
-    val mensagem: BackupMensagem? = null
+    val mensagem: BackupMensagem? = null,
+    val backupsEmDownloads: List<BackupArquivo> = emptyList()
 )
 
 class BackupViewModel(private val repository: DecantesRepository) : ViewModel() {
@@ -24,16 +26,30 @@ class BackupViewModel(private val repository: DecantesRepository) : ViewModel() 
     private val _uiState = MutableStateFlow(BackupUiState())
     val uiState: StateFlow<BackupUiState> = _uiState.asStateFlow()
 
-    fun exportar(uri: Uri) {
-        _uiState.value = BackupUiState(processando = true)
+    init {
+        carregarBackups()
+    }
+
+    fun carregarBackups() {
+        viewModelScope.launch {
+            val lista = repository.listarBackupsEmDownloads()
+            _uiState.value = _uiState.value.copy(backupsEmDownloads = lista)
+        }
+    }
+
+    fun exportar() {
+        _uiState.value = _uiState.value.copy(processando = true, mensagem = null)
         viewModelScope.launch {
             try {
-                repository.exportarParaUri(uri)
-                _uiState.value = BackupUiState(
-                    mensagem = BackupMensagem.Sucesso("Backup exportado com sucesso")
+                val nomeArquivo = repository.exportarParaDownloads()
+                _uiState.value = _uiState.value.copy(
+                    processando = false,
+                    mensagem = BackupMensagem.Sucesso("Backup salvo em Downloads/$nomeArquivo")
                 )
+                carregarBackups()
             } catch (e: Exception) {
-                _uiState.value = BackupUiState(
+                _uiState.value = _uiState.value.copy(
+                    processando = false,
                     mensagem = BackupMensagem.Erro("Erro ao exportar: ${e.message ?: "desconhecido"}")
                 )
             }
@@ -41,15 +57,17 @@ class BackupViewModel(private val repository: DecantesRepository) : ViewModel() 
     }
 
     fun restaurar(uri: Uri) {
-        _uiState.value = BackupUiState(processando = true)
+        _uiState.value = _uiState.value.copy(processando = true, mensagem = null)
         viewModelScope.launch {
             try {
                 repository.restaurarDeUri(uri)
-                _uiState.value = BackupUiState(
+                _uiState.value = _uiState.value.copy(
+                    processando = false,
                     mensagem = BackupMensagem.Sucesso("Dados restaurados com sucesso")
                 )
             } catch (e: Exception) {
-                _uiState.value = BackupUiState(
+                _uiState.value = _uiState.value.copy(
+                    processando = false,
                     mensagem = BackupMensagem.Erro("Erro ao restaurar: ${e.message ?: "arquivo inválido"}")
                 )
             }

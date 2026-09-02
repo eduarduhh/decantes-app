@@ -25,17 +25,15 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,9 +59,11 @@ import com.eduarduhh.decantes.data.entity.Frete
 import com.eduarduhh.decantes.data.entity.Perfume
 import com.eduarduhh.decantes.data.relation.PerfumeComPagamentos
 import com.eduarduhh.decantes.data.repository.DecantesRepository
+import com.eduarduhh.decantes.ui.components.CATEGORIAS_PERFUME
 import com.eduarduhh.decantes.ui.components.CategoriaIcon
 import com.eduarduhh.decantes.ui.components.ConfirmDialog
 import com.eduarduhh.decantes.ui.components.PagamentoDialog
+import com.eduarduhh.decantes.ui.components.PerfumeFormDialog
 import com.eduarduhh.decantes.ui.components.StatusBadge
 import com.eduarduhh.decantes.ui.components.formatarData
 import com.eduarduhh.decantes.ui.components.formatarMoeda
@@ -110,7 +110,7 @@ fun GroupDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { menuAberto = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Opções")
+                        Icon(Icons.Filled.MoreVert, contentDescription = "Opções")
                     }
                     DropdownMenu(expanded = menuAberto, onDismissRequest = { menuAberto = false }) {
                         DropdownMenuItem(
@@ -183,7 +183,8 @@ fun GroupDetailScreen(
                     saldoGrupo = uiState.saldoGrupo,
                     frete = uiState.totalFrete,
                     valoresOcultos = valoresOcultos,
-                    onAlternarValoresOcultos = { valoresOcultos = !valoresOcultos }
+                    onAlternarValoresOcultos = { valoresOcultos = !valoresOcultos },
+                    onLancarFrete = { mostrarDialogoFrete = true }
                 )
                 CategoriaTotalizador(quantidadePorCategoria = uiState.quantidadePorCategoria)
                 if (uiState.fretes.isNotEmpty()) {
@@ -203,11 +204,20 @@ fun GroupDetailScreen(
                 )
                 if (uiState.perfumes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "Nenhum perfume encontrado com esse filtro",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Nenhum perfume encontrado com esse filtro",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 } else {
                     LazyColumn(
@@ -341,7 +351,8 @@ private fun GrupoTotalizador(
     saldoGrupo: Double,
     frete: Double,
     valoresOcultos: Boolean,
-    onAlternarValoresOcultos: () -> Unit
+    onAlternarValoresOcultos: () -> Unit,
+    onLancarFrete: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -378,12 +389,21 @@ private fun GrupoTotalizador(
                     )
                 }
             }
-            IconButton(onClick = onAlternarValoresOcultos) {
-                Icon(
-                    if (valoresOcultos) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                    contentDescription = if (valoresOcultos) "Mostrar valores" else "Ocultar valores",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+            Row {
+                IconButton(onClick = onLancarFrete) {
+                    Icon(
+                        Icons.Filled.LocalShipping,
+                        contentDescription = "Lançar frete",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                IconButton(onClick = onAlternarValoresOcultos) {
+                    Icon(
+                        if (valoresOcultos) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = if (valoresOcultos) "Mostrar valores" else "Ocultar valores",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }
@@ -465,7 +485,12 @@ private fun FreteItem(
             }
             Row {
                 TextButton(onClick = onEditar) { Text("Editar") }
-                TextButton(onClick = onExcluir) { Text("Excluir") }
+                TextButton(
+                    onClick = onExcluir,
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) { Text("Excluir") }
             }
         }
     }
@@ -636,7 +661,12 @@ private fun PerfumeItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onEditar) { Text("Editar") }
-                TextButton(onClick = onExcluir) { Text("Excluir") }
+                TextButton(
+                    onClick = onExcluir,
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) { Text("Excluir") }
                 Spacer(modifier = Modifier.weight(1f))
                 val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
                 val context = androidx.compose.ui.platform.LocalContext.current
@@ -656,155 +686,6 @@ private fun PerfumeItem(
     }
 }
 
-private val CATEGORIAS_PERFUME = listOf("Masculino", "Feminino", "Compartilhável")
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PerfumeFormDialogPreview() {
-    com.eduarduhh.decantes.ui.theme.DecantesTheme {
-        PerfumeFormDialog(
-            titulo = "Novo perfume",
-            marcasSugeridas = listOf("Dior", "Chanel"),
-            onDismiss = {},
-            onConfirmar = { _, _, _, _, _ -> }
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PerfumeFormDialog(
-    titulo: String,
-    nomeInicial: String = "",
-    marcaInicial: String = "",
-    mlInicial: String = "",
-    valorInicial: String = "",
-    categoriaInicial: String = CATEGORIAS_PERFUME.last(),
-    marcasSugeridas: List<String> = emptyList(),
-    onDismiss: () -> Unit,
-    onConfirmar: (nome: String, marca: String, ml: String, valor: String, categoria: String) -> Unit
-) {
-    var nome by rememberSaveable { mutableStateOf(nomeInicial) }
-    var marca by rememberSaveable { mutableStateOf(marcaInicial) }
-    var ml by rememberSaveable { mutableStateOf(mlInicial) }
-    var valor by rememberSaveable { mutableStateOf(valorInicial) }
-    var categoria by rememberSaveable { mutableStateOf(categoriaInicial) }
-    var menuCategoriaExpandido by remember { mutableStateOf(false) }
-    var menuMarcaExpandido by remember { mutableStateOf(false) }
-    val marcasFiltradas = remember(marca, marcasSugeridas) {
-        if (marca.isBlank()) {
-            marcasSugeridas
-        } else {
-            marcasSugeridas.filter { it.contains(marca, ignoreCase = true) && !it.equals(marca, ignoreCase = true) }
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(titulo) },
-        text = {
-            Column {
-                ExposedDropdownMenuBox(
-                    expanded = menuMarcaExpandido && marcasFiltradas.isNotEmpty(),
-                    onExpandedChange = { menuMarcaExpandido = it }
-                ) {
-                    OutlinedTextField(
-                        value = marca,
-                        onValueChange = {
-                            marca = it
-                            menuMarcaExpandido = true
-                        },
-                        label = { Text("Marca (opcional)") },
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryEditable)
-                    )
-                    DropdownMenu(
-                        expanded = menuMarcaExpandido && marcasFiltradas.isNotEmpty(),
-                        onDismissRequest = { menuMarcaExpandido = false },
-                        modifier = Modifier.exposedDropdownSize()
-                    ) {
-                        marcasFiltradas.forEach { sugestao ->
-                            DropdownMenuItem(
-                                text = { Text(sugestao) },
-                                onClick = {
-                                    marca = sugestao
-                                    menuMarcaExpandido = false
-                                }
-                            )
-                        }
-                    }
-                }
-                OutlinedTextField(
-                    value = nome,
-                    onValueChange = { nome = it },
-                    label = { Text("Nome do perfume") },
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                )
-                OutlinedTextField(
-                    value = ml,
-                    onValueChange = { ml = it },
-                    label = { Text("Quantidade (ml)") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
-                    ),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                )
-                OutlinedTextField(
-                    value = valor,
-                    onValueChange = { valor = it },
-                    label = { Text("Valor total (R$)") },
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
-                    ),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                )
-                ExposedDropdownMenuBox(
-                    expanded = menuCategoriaExpandido,
-                    onExpandedChange = { menuCategoriaExpandido = it },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = categoria,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Categoria") },
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    )
-                    DropdownMenu(
-                        expanded = menuCategoriaExpandido,
-                        onDismissRequest = { menuCategoriaExpandido = false },
-                        modifier = Modifier.exposedDropdownSize()
-                    ) {
-                        CATEGORIAS_PERFUME.forEach { opcao ->
-                            DropdownMenuItem(
-                                text = { Text(opcao) },
-                                onClick = {
-                                    categoria = opcao
-                                    menuCategoriaExpandido = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirmar(nome, marca, ml, valor, categoria) }) { Text("Salvar") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditarGrupoDialog(
@@ -822,6 +703,9 @@ private fun EditarGrupoDialog(
                 value = nome,
                 onValueChange = { nome = it },
                 label = { Text("Nome do grupo") },
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Words
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
         },
