@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,9 +33,9 @@ fun PagamentoDialog(
     onDismiss: () -> Unit,
     onConfirmar: (valor: Double, dataMillis: Long) -> Unit
 ) {
-    var valorTexto by remember { mutableStateOf(valorInicial?.let { "%.2f".format(it) } ?: "") }
+    var valorTexto by rememberSaveable { mutableStateOf(valorInicial?.let { "%.2f".format(it) } ?: "") }
     var valorErro by remember { mutableStateOf<String?>(null) }
-    var dataMillis by remember { mutableStateOf(dataInicialMillis) }
+    var dataMillis by rememberSaveable { mutableStateOf(dataInicialMillis) }
     var mostrarDatePicker by remember { mutableStateOf(false) }
 
     AlertDialog(

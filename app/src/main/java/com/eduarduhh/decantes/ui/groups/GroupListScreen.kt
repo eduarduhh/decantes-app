@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -183,7 +184,7 @@ private fun NovoGrupoDialog(
     onDismiss: () -> Unit,
     onConfirmar: (String) -> Unit
 ) {
-    var nome by remember { mutableStateOf("") }
+    var nome by rememberSaveable { mutableStateOf("") }
     var erro by remember { mutableStateOf<String?>(null) }
 
     androidx.compose.material3.AlertDialog(

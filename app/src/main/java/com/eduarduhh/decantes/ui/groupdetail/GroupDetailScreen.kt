@@ -552,6 +552,30 @@ private fun FiltroEOrdenacao(
     }
 }
 
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun PerfumeItemPreview() {
+    com.eduarduhh.decantes.ui.theme.DecantesTheme {
+        PerfumeItem(
+            item = PerfumeComPagamentos(
+                perfume = Perfume(
+                    id = 1,
+                    grupoId = 1,
+                    nome = "Sauvage",
+                    marca = "Dior",
+                    ml = 10,
+                    valorTotal = 150.0,
+                    categoria = "Masculino"
+                ),
+                pagamentos = listOf(com.eduarduhh.decantes.data.entity.Pagamento(id = 1, perfumeId = 1, valor = 60.0, data = 0))
+            ),
+            onClick = {},
+            onEditar = {},
+            onExcluir = {}
+        )
+    }
+}
+
 @Composable
 private fun PerfumeItem(
     item: PerfumeComPagamentos,
@@ -634,6 +658,20 @@ private fun PerfumeItem(
 
 private val CATEGORIAS_PERFUME = listOf("Masculino", "Feminino", "Compartilhável")
 
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PerfumeFormDialogPreview() {
+    com.eduarduhh.decantes.ui.theme.DecantesTheme {
+        PerfumeFormDialog(
+            titulo = "Novo perfume",
+            marcasSugeridas = listOf("Dior", "Chanel"),
+            onDismiss = {},
+            onConfirmar = { _, _, _, _, _ -> }
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PerfumeFormDialog(
@@ -647,11 +685,11 @@ private fun PerfumeFormDialog(
     onDismiss: () -> Unit,
     onConfirmar: (nome: String, marca: String, ml: String, valor: String, categoria: String) -> Unit
 ) {
-    var nome by remember { mutableStateOf(nomeInicial) }
-    var marca by remember { mutableStateOf(marcaInicial) }
-    var ml by remember { mutableStateOf(mlInicial) }
-    var valor by remember { mutableStateOf(valorInicial) }
-    var categoria by remember { mutableStateOf(categoriaInicial) }
+    var nome by rememberSaveable { mutableStateOf(nomeInicial) }
+    var marca by rememberSaveable { mutableStateOf(marcaInicial) }
+    var ml by rememberSaveable { mutableStateOf(mlInicial) }
+    var valor by rememberSaveable { mutableStateOf(valorInicial) }
+    var categoria by rememberSaveable { mutableStateOf(categoriaInicial) }
     var menuCategoriaExpandido by remember { mutableStateOf(false) }
     var menuMarcaExpandido by remember { mutableStateOf(false) }
     val marcasFiltradas = remember(marca, marcasSugeridas) {
@@ -774,7 +812,7 @@ private fun EditarGrupoDialog(
     onDismiss: () -> Unit,
     onConfirmar: (String) -> Unit
 ) {
-    var nome by remember { mutableStateOf(nomeInicial) }
+    var nome by rememberSaveable { mutableStateOf(nomeInicial) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
